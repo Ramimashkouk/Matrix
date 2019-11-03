@@ -37,17 +37,21 @@ class Matrix:
         if self.arr[0][0] == 0:
             for k in range(self.rows):
                 if self.arr[k][0] != 0:
-                    row = self.arr[0]
+                    row_substitute = self.arr[0]
                     self.arr[0] = self.arr[k]
-                    self.arr[k] = row
+                    self.arr[k] = row_substitute
                     break
         for j in range(self.cols):
             for i in range(self.rows):
                 if j<i and self.arr[i][j] !=0:
+                    if self.arr[j][j] == 0:
+                        row_substitute = self.arr[i]
+                        self.arr[i] = self.arr[j]
+                        self.arr[j] = row_substitute
+                        continue
                     row = Matrix(1, self.cols, self.arr[i])
                     row = row + Matrix(1, self.cols, 
                         self.multiply(j, -(self.arr[i][j])/self.arr[j][j]))
-
                     self.arr[i] = row.arr[0]
     def rank(self):
         self.upperTriMat()
