@@ -7,10 +7,11 @@ class Matrix:
         self.arr = [[0 for i in range(self.cols)] for j in range(self.rows)]
         k = 0
 
-        for i in range(self.rows):
-            for j in range(self.cols):
-                self.arr[i][j] = eleList[k]
-                k+=1
+        if eleList != []:
+            for i in range(self.rows):
+                for j in range(self.cols):
+                    self.arr[i][j] = eleList[k]
+                    k+=1
 
     def showArr(self):
         for i in range(self.rows):
@@ -22,11 +23,15 @@ class Matrix:
             A[row][j] *= num
         return A[row]
 
-    def add(self, row1, row2):
-        row = []
-        for i in range(len(row1)):
-            row.append(row1[i] + row2[i]) # why row[i] = row1[i] + row2[i] didn't work
-        return row
+    def __add__(self, A):
+        array = Matrix(A.rows, A.cols)
+        if A.rows == self.rows and A.cols == self.cols:
+            for i in range(A.rows):
+                for j in range(A.cols):
+                    array.arr[i][j] = A.arr[i][j] + self.arr[i][j]
+            return array
+        else:
+            print('The dementions of matrices do not match')
 
     def upperTriMat(self):
         if self.arr[0][0] == 0:
@@ -38,12 +43,12 @@ class Matrix:
                     break
         for j in range(self.cols):
             for i in range(self.rows):
-                row = []
                 if j<i and self.arr[i][j] !=0:
-                    self.arr[i] = self.add(
-                        self.arr[i] , 
-                        self.multiply(j, -(self.arr[i][j])/self.arr[j][j])
-                        )
+                    row = Matrix(1, self.cols, self.arr[i])
+                    row = row + Matrix(1, self.cols, 
+                        self.multiply(j, -(self.arr[i][j])/self.arr[j][j]))
+
+                    self.arr[i] = row.arr[0]
     def rank(self):
         self.upperTriMat()
         rank = 0
