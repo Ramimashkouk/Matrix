@@ -24,5 +24,18 @@ print()
 print('The rank of the given matrix is {}'.format(m.rank()))
 
 m.upperTriMat().showArr()
+print()
 
+a = matrix.Matrix(5 , 3 , [1, -5, 0, 2, 0, 4, 3, -7, 5, 6, 3, -8, 2, 3, 7])
+b = matrix.Matrix(3, 4 , [7, 9, 0, -6,-2, 0, 3, -7, 8, -9, 0, 0])
 
+"""c =matrix.Matrix(5, 4)
+print('the multibly of matrices a and b is: ')
+c = a * b 
+c.showArr()"""
+
+print()
+#a.transposition().showArr()
+#s= matrix.Matrix(4, 3, [1, -1, 0, -1, 2, 1, 2, -3, -1, 0,1,1])
+s = matrix.Matrix(5, 4, [5, 3 , 2 , -6 , 0, 2, 0 , 3, -4, 0, 3, -7, 0, 0,0, 2,1, -5, 0, 4])
+s.pseudoInverse().showArr()
