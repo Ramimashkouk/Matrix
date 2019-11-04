@@ -14,6 +14,11 @@ class Matrix:
                     self.arr[i][j] = eleList[k]
                     k+=1
 
+    def initiate(self, A):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.arr[i][j] = A.arr[i][j]
+
     def showArr(self):
         if self.arr is None:
             return
@@ -44,7 +49,19 @@ class Matrix:
                     array.arr[i][j] = A.arr[i][j] + self.arr[i][j]
             return array
         else:
-            print('The dementions of matrices do not match')
+            print('The dementions of matrices do not match for the add operation')
+            return self.nonemat()
+
+    def __sub__(self, A):
+        array = Matrix(A.rows, A.cols)
+        if A.rows == self.rows and A.cols == self.cols:
+            for i in range(A.rows):
+                for j in range(A.cols):
+                    array.arr[i][j] = self.arr[i][j] - A.arr[i][j]
+            return array
+        else:
+            print('The dementions of matrices do not match for the sub operation')
+            return self.nonemat()
 
     def upperTriMat(self):
         A = Matrix(self.rows, self.cols)
@@ -83,16 +100,22 @@ class Matrix:
 
     def transposition(self):
         A = Matrix(self.cols, self.rows)
-        for i in range(self.rows):
+        for i in range(A.rows):
             for j in range(A.cols):
-                A.arr[j][i] = self.arr[i][j]
+                A.arr[i][j] = self.arr[j][i]
+        return A
+
+    # a function return a none matrix, therefore the showArr() func can recieve the special cases
+    def nonemat(self): 
+        A = Matrix(1,1)
+        A.arr = None
         return A
 
     def inverse(self):
-
+        
         if self.rows != self.cols:
             print('The matrix is not square')
-            return
+            return self.nonemat()
 
         # being sure that the first column is not a zeros vector
         A = Matrix(self.rows, self.cols)
@@ -102,7 +125,7 @@ class Matrix:
             det *= A.arr[i][i]
         if det == 0:
             print('Determinant is zero, therefore inverse matrix doesn\'t exist')
-            return
+            return self.nonemat()
 
         # create an identity matrix
         identity = Matrix(self.rows, self.cols)
@@ -149,3 +172,119 @@ class Matrix:
         for i in range(mat2.rows):
             inv.arr[i] = mat2.arr[i][self.cols:]
         return inv
+
+    def __mul__(self, A):
+        if self.cols != A.rows:
+            print('The deminations of matrices do not match for the multibly operation: m != n')
+            return self.nonemat()
+        mat = Matrix(self.rows, A.cols)
+
+        """for i in range(self.rows):
+            for j in range(A.cols):
+                mat.arr[i][j] = 0"""
+
+        for i in range(self.rows):
+            for j in range(A.cols):
+                for k in range(self.cols):
+                    mat.arr[i][j] += self.arr[i][k] * A.arr[k][j]
+        
+        return mat
+
+    def pseudoInverse(self):
+
+        """
+            If n = m, that means the matrix is squere and we can calculate its inverse
+
+            Otherwise, we need the pseudo Inverse. We calculate it as follow:
+
+            A1plus = (1/(akRow * akCol) ) * akRow
+            
+            dk = APlus(k-1) * akCol
+
+            ck = akCol - A(k-1) * dk
+
+            if ck == 0 then:
+                bk = ckPlus = (1/(ckRow * ckCol)) * ckRow
+            else:
+                bk = (1/(1+ dkRow * dkCol)) * dkRow * APlus(k-1)
+            
+            Bk = A(k-1) - dk * bk
+
+            APlus(k) = [Bk, bk]
+
+            A(k) = [a0, a1, .... k]
+        """
+
+
+
+        if self.rows == self.cols:
+            return self.inverse()
+        
+        akRow = Matrix(1, self.rows)
+        for i in range(self.cols):
+            akRow.arr[0] = self.transposition().arr[i]
+            akCol = akRow.transposition()
+
+            # Calculate A1Plus
+            if i == 0:
+                q = akRow * akCol
+                num = q.arr[0][0]
+                num = 1/num
+                q.arr[0][0] = num
+                APlus = q * akRow       # This is the A(k-1)plus, will be used in the next round
+                
+                #Calculate A(k-1) to be used in the next round
+                A = Matrix(self.rows, 1)
+                for j in range(self.rows):
+                    for k in range(self.cols):
+                        if k == 0:
+                            A.arr[j][k] = self.arr[j][k]
+                continue
+            
+            #Calculate dk, ck
+            dk = APlus * akCol
+            temp = A * dk
+            ck = akCol - temp
+            
+            #Calculate bk
+            temp2 = 0
+            for j in range(ck.rows):
+                if ck.arr[j][0] != 0:
+                    temp2 = 1
+                    break
+            if temp2 == 1:
+                ckCol = ck
+                ckRow = ckCol.transposition()
+                q = ckRow * ckCol
+                num = q.arr[0][0]
+                num = 1/num
+                q.arr[0][0] = num
+                bk = q * ckRow
+            else:
+                dkCol = dk
+                dkRow = dkCol.transposition()
+                q = dkRow * dkCol
+                num = q.arr[0][0]
+                num = 1/(num+1)
+                q.arr[0][0] = num
+                bkTemp = q * dkRow
+                bk = bkTemp * APlus
+
+            #Calculate Bk
+            temp3 = dk * bk
+            Bk = APlus - temp3
+
+
+            #   initiate APlus. This is the A(k-1)plus, will be used in the next round
+            APlus = Matrix(i+1, self.rows)
+            jj=0
+            for j in range(Bk.rows):
+                APlus.arr[j] = Bk.arr[j]
+                jj=j
+            APlus.arr[jj+1] = bk.arr[0]
+
+            #Calculate A(k-1) to be used in the next round
+            A = Matrix(self.rows, i+1)
+            A.initiate(self)
+
+        return APlus
