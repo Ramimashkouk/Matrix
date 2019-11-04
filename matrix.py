@@ -190,7 +190,7 @@ class Matrix:
         
         return mat
 
-    def pseudoInverse(self):
+    def pseudoInverse(self, zeroFirstCol= False):
 
         """
             If n = m, that means the matrix is squere and we can calculate its inverse
@@ -215,8 +215,6 @@ class Matrix:
             A(k) = [a0, a1, .... k]
         """
 
-
-
         if self.rows == self.cols:
             return self.inverse()
         
@@ -229,6 +227,15 @@ class Matrix:
             if i == 0:
                 q = akRow * akCol
                 num = q.arr[0][0]
+                if num == 0:    # if the first column is zero remove it and add it to the output matrix as a row
+                    if self.cols == 1:
+                        print('The matrix is zero matrix')
+                        return self.nonemat()
+                    ZFC = Matrix(self.rows, self.cols - 1)
+                    for q in range(ZFC.rows):
+                        for w in range(ZFC.cols):
+                            ZFC.arr[q][w] = self.arr[q][w+1]
+                    return ZFC.pseudoInverse(True)
                 num = 1/num
                 q.arr[0][0] = num
                 APlus = q * akRow       # This is the A(k-1)plus, will be used in the next round
@@ -286,5 +293,13 @@ class Matrix:
             #Calculate A(k-1) to be used in the next round
             A = Matrix(self.rows, i+1)
             A.initiate(self)
+
+        if zeroFirstCol:  #  Add a zero row to the top of output
+            ZFC = Matrix(APlus.rows+1, APlus.cols)
+            ZFC.arr[0] = [0 for k in range(ZFC.cols)]
+            for i in range(APlus.rows):
+                for j in range(APlus.cols):
+                    ZFC.arr[i+1][j] = APlus.arr[i][j]
+            return ZFC
 
         return APlus
