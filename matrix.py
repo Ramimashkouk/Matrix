@@ -66,24 +66,22 @@ class Matrix:
     def upperTriMat(self):
         A = Matrix(self.rows, self.cols)
         A.arr = copy.deepcopy(self.arr)
-        if A.arr[0][0] == 0:
-            for k in range(A.rows):
-                if A.arr[k][0] != 0:
-                    row_substitute = A.arr[0]
-                    A.arr[0] = A.arr[k]
-                    A.arr[k] = row_substitute
-                    break
+        
         for j in range(A.cols):
             for i in range(A.rows):
                 if j<i and A.arr[i][j] !=0:
-                    if A.arr[j][j] == 0:
+                    """if the reference item(in the main diagonal) in the reference column, on which other elements will be divided,
+                    is zero, exchange its row with the row of element, which you've just entered this 'if' to change
+                    (which is not zero for sure according to the condition)"""
+                    if A.arr[j][j] == 0:    
                         row_substitute = A.arr[i]
                         A.arr[i] = A.arr[j]
                         A.arr[j] = row_substitute
                         continue
                     row = Matrix(1, A.cols, A.arr[i])
                     row = row + Matrix(1, A.cols, 
-                        A.multiply(j, -(A.arr[i][j])/Fraction(A.arr[j][j])))
+                        A.multiply(j, -(A.arr[i][j])/Fraction(A.arr[j][j]))) # multibly the whole row with the number(
+                                        #division of the number we want to zero by the reference number in this column)
                     A.arr[i] = row.arr[0]
         return A
     
@@ -91,7 +89,7 @@ class Matrix:
         A = Matrix(self.rows, self.cols)
         A = self.upperTriMat()
         rank = 0
-        for i in range(A.rows):
+        for i in range(A.rows):     #Count how many zero rows in the upper triangular matrix
             for j in range(A.cols):
                 if A.arr[i][j] !=0:
                     rank += 1
@@ -303,3 +301,7 @@ class Matrix:
             return ZFC
 
         return APlus
+
+    def linearSystem(self, b):
+        selfInverse= self.pseudoInverse()
+        return selfInverse * b
